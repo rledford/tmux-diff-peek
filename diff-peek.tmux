@@ -10,3 +10,5 @@ staged_key=$(get_tmux_option "$DIFF_PEEK_STAGED_KEY_OPTION" "$DIFF_PEEK_STAGED_K
 
 tmux bind-key "$key" run-shell "$PLUGIN_DIR/scripts/diff_peek.sh"
 tmux bind-key "$staged_key" run-shell "$PLUGIN_DIR/scripts/diff_peek_staged.sh"
+
+exit 0
