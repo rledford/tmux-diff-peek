@@ -6,8 +6,8 @@ A tmux plugin that shows git diffs in a popup overlay without leaving your curre
 
 `tmux-diff-peek` provides two keybindings for viewing git diffs in a floating popup window:
 
-- `<prefix>-g` — Opens a popup showing unstaged changes for the current pane's git context. The plugin uses smart process-tree detection to determine the relevant working directory based on what is running in the active pane.
-- `<prefix>-G` — Prompts for a path, then opens a popup showing `git diff <path>`.
+- `<prefix>-g` — Opens a popup showing unstaged changes and untracked files for the current pane's git context. The plugin uses smart process-tree detection to determine the relevant working directory based on what is running in the active pane.
+- `<prefix>-G` — Opens a popup showing staged changes (`git diff --cached`) for the current pane's git context.
 
 ## Requirements
 
@@ -38,8 +38,8 @@ git clone https://github.com/rledford/tmux-diff-peek ~/.tmux/plugins/tmux-diff-p
 
 | Keybinding | Action |
 |---|---|
-| `<prefix>-g` | Show unstaged diff for current pane's git context |
-| `<prefix>-G` | Prompt for a path, then show `git diff <path>` |
+| `<prefix>-g` | Show unstaged and untracked diff for current pane's git context |
+| `<prefix>-G` | Show staged diff for current pane's git context |
 
 ## Configuration
 
@@ -47,18 +47,18 @@ All options are set in `~/.tmux.conf`.
 
 ### `@diff-peek-key`
 
-The key used to trigger the smart-context diff popup. Default: `g`
+The key used to trigger the unstaged/untracked diff popup. Default: `g`
 
 ```tmux
 set -g @diff-peek-key 'g'
 ```
 
-### `@diff-peek-path-key`
+### `@diff-peek-staged-key`
 
-The key used to trigger the path-prompted diff popup. Default: `G`
+The key used to trigger the staged diff popup. Default: `G`
 
 ```tmux
-set -g @diff-peek-path-key 'G'
+set -g @diff-peek-staged-key 'G'
 ```
 
 ### `@diff-peek-width`
@@ -79,7 +79,7 @@ set -g @diff-peek-height '80%'
 
 ## Pager Support
 
-The diff viewer respects git's `core.pager` setting. Configure your preferred pager in your git config and it will be used automatically:
+The diff viewer respects git's pager configuration. Configure your preferred pager in your git config and it will be used automatically:
 
 ```sh
 git config --global core.pager delta
@@ -96,5 +96,5 @@ tmux run-shell '$PLUGIN_DIR/scripts/diff_peek.sh'
 ```
 
 ```sh
-tmux run-shell '$PLUGIN_DIR/scripts/diff_peek_path.sh "/path/to/repo"'
+tmux run-shell '$PLUGIN_DIR/scripts/diff_peek_staged.sh'
 ```
