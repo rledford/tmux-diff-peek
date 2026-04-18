@@ -54,6 +54,15 @@ has_diff() {
   return $?
 }
 
+has_untracked() {
+  [ -n "$(git -C "$1" ls-files --others --exclude-standard 2>/dev/null)" ]
+}
+
+has_staged() {
+  git -C "$1" diff --cached --quiet 2>/dev/null
+  return $?
+}
+
 _collect_pids() {
   echo "$1"
   for child in $(pgrep -P "$1" 2>/dev/null); do

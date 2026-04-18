@@ -10,13 +10,12 @@ git_dir="$(resolve_git_cwd "$pane_pid" "$pane_current_path")"
 
 check_git_repo "$git_dir" || exit 1
 
-if has_diff "$git_dir" && ! has_untracked "$git_dir"; then
-  tmux display-message "diff-peek: no unstaged or untracked changes"
+if has_staged "$git_dir"; then
+  tmux display-message "diff-peek: no staged changes"
   exit 0
 fi
 
 width="$(get_tmux_option "$DIFF_PEEK_WIDTH_OPTION" "$DIFF_PEEK_WIDTH_DEFAULT")"
 height="$(get_tmux_option "$DIFF_PEEK_HEIGHT_OPTION" "$DIFF_PEEK_HEIGHT_DEFAULT")"
 
-tmux display-popup -E -d "$git_dir" -w "$width" -h "$height" -T " git diff " -- \
-  sh -c '{ git diff --color=always; git ls-files --others --exclude-standard | while IFS= read -r f; do git diff --color=always --no-index /dev/null "$f"; done; } | less -R'
+tmux display-popup -E -d "$git_dir" -w "$width" -h "$height" -T " git diff --staged " -- git diff --cached
