@@ -20,7 +20,7 @@ A tmux plugin that shows git diffs in a popup overlay without leaving your curre
 Add the following to your `~/.tmux.conf`:
 
 ```tmux
-set -g @plugin 'user/tmux-diff-peek'
+set -g @plugin 'rledford/tmux-diff-peek'
 ```
 
 Then press `prefix + I` to install.
@@ -30,7 +30,7 @@ Then press `prefix + I` to install.
 Clone the repository and run the registration script:
 
 ```sh
-git clone https://github.com/user/tmux-diff-peek ~/.tmux/plugins/tmux-diff-peek
+git clone https://github.com/rledford/tmux-diff-peek ~/.tmux/plugins/tmux-diff-peek
 ~/.tmux/plugins/tmux-diff-peek/diff-peek.tmux
 ```
 
