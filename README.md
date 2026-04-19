@@ -87,6 +87,31 @@ git config --global core.pager delta
 
 Any pager that works with `git diff` (e.g., `delta`, `diff-so-fancy`) will work inside the popup.
 
+## Status Bar Git Info
+
+The plugin automatically updates a per-pane tmux variable `@git_status` whenever you switch panes. This variable contains the current branch name along with counts for modified, staged, and untracked files — omitting any category with a count of zero.
+
+Example values:
+
+```
+main
+main ●2
+main ●2 +1 ?3
+```
+
+Where `●` = modified, `+` = staged, `?` = untracked.
+
+The plugin uses the same process-tree detection as the diff popup, so the branch and counts reflect the deepest git context in the pane's process tree — including worktrees entered by running processes.
+
+To display it in your status bar, add `#{@git_status}` to `status-right` in `~/.tmux.conf`. For a periodic refresh between pane switches, also include a `#()` call to the script:
+
+```tmux
+set -g status-right "#(~/.tmux/plugins/tmux-diff-peek/scripts/git_status.sh #{pane_id} #{pane_pid} #{pane_current_path})#[fg=colour141]#{@git_status}"
+set -g status-interval 10
+```
+
+The `#()` call produces no output — it runs as a side effect to keep `@git_status` current while you work in a single pane.
+
 ## AI Agent Usage
 
 The plugin works identically for AI agents (e.g., Claude Code). Agents can invoke the diff popup via the normal keybinding or call the scripts directly:
