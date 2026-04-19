@@ -8,7 +8,7 @@ pane_current_path="$(tmux display-message -p "#{pane_current_path}")"
 
 git_dir="$(resolve_git_cwd "$pane_pid" "$pane_current_path")"
 
-check_git_repo "$git_dir" || exit 1
+check_git_repo "$git_dir" || exit 0
 
 if has_staged "$git_dir"; then
   tmux display-message "diff-peek: no staged changes"

@@ -41,7 +41,10 @@ resolve_path() {
 
 check_git_repo() {
   if ! git -C "$1" rev-parse --is-inside-work-tree >/dev/null 2>/dev/null; then
-    tmux display-message "diff-peek: not a git repository: $1"
+    _saved_style="$(tmux show -gv message-style 2>/dev/null)"
+    tmux set -g message-style "fg=yellow"
+    tmux display-message "diff-peek: not a git repository"
+    tmux set -g message-style "${_saved_style:-default}"
     return 1
   fi
   return 0
