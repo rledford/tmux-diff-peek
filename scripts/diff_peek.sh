@@ -19,4 +19,4 @@ width="$(get_tmux_option "$DIFF_PEEK_WIDTH_OPTION" "$DIFF_PEEK_WIDTH_DEFAULT")"
 height="$(get_tmux_option "$DIFF_PEEK_HEIGHT_OPTION" "$DIFF_PEEK_HEIGHT_DEFAULT")"
 
 tmux display-popup -E -d "$git_dir" -w "$width" -h "$height" -T " git diff " -- \
-  sh -c '{ git diff --color=always; git ls-files --others --exclude-standard | while IFS= read -r f; do git diff --color=always --no-index /dev/null "$f"; done; } | eval "$(git var GIT_PAGER)"'
+  sh -c 'export DELTA_PAGER="less -R" LESS=R; { git diff --color=always; git ls-files --others --exclude-standard | while IFS= read -r f; do git diff --color=always --no-index /dev/null "$f"; done; } | eval "$(git var GIT_PAGER)"'

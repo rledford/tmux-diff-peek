@@ -18,4 +18,5 @@ fi
 width="$(get_tmux_option "$DIFF_PEEK_WIDTH_OPTION" "$DIFF_PEEK_WIDTH_DEFAULT")"
 height="$(get_tmux_option "$DIFF_PEEK_HEIGHT_OPTION" "$DIFF_PEEK_HEIGHT_DEFAULT")"
 
-tmux display-popup -E -d "$git_dir" -w "$width" -h "$height" -T " git diff --staged " -- git diff --cached
+tmux display-popup -E -d "$git_dir" -w "$width" -h "$height" -T " git diff --staged " -- \
+  sh -c 'DELTA_PAGER="less -R" LESS=R git diff --cached'
