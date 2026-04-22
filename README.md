@@ -6,7 +6,7 @@ A tmux plugin that shows git diffs in a popup overlay without leaving your curre
 
 `tmux-diff-peek` provides two keybindings for viewing git diffs in a floating popup window:
 
-- `<prefix>-g` — Opens a popup showing unstaged changes and untracked files for the current pane's git context. The plugin uses smart process-tree detection to determine the relevant working directory based on what is running in the active pane.
+- `<prefix>-g` — Opens a popup showing unstaged changes and untracked files for the current pane's git context. The working directory is taken from `#{pane_current_path}` by default, or from a per-pane cache file populated by an agent hook (see [Agent CWD Hook](#agent-cwd-hook)).
 - `<prefix>-G` — Opens a popup showing staged changes (`git diff --cached`) for the current pane's git context.
 
 ## Requirements
@@ -101,25 +101,50 @@ main ●2 +1 ?3
 
 Where `●` = modified, `+` = staged, `?` = untracked.
 
-The plugin uses the same process-tree detection as the diff popup, so the branch and counts reflect the deepest git context in the pane's process tree — including worktrees entered by running processes.
-
 To display it in your status bar, add `#{@git_status}` to `status-right` in `~/.tmux.conf`. For a periodic refresh between pane switches, also include a `#()` call to the script:
 
 ```tmux
-set -g status-right "#(~/.tmux/plugins/tmux-diff-peek/scripts/git_status.sh #{pane_id} #{pane_pid} #{pane_current_path})#[fg=colour141]#{@git_status}"
+set -g status-right "#(~/.tmux/plugins/tmux-diff-peek/scripts/git_status.sh #{pane_id} #{pane_current_path})#[fg=colour141]#{@git_status}"
 set -g status-interval 10
 ```
 
 The `#()` call produces no output — it runs as a side effect to keep `@git_status` current while you work in a single pane.
 
-## AI Agent Usage
+## Agent CWD Hook
 
-The plugin works identically for AI agents (e.g., Claude Code). Agents can invoke the diff popup via the normal keybinding or call the scripts directly:
+When a long-running agent is launched in a tmux pane and then switches to a different working directory internally (e.g., into a worktree), the pane's `#{pane_current_path}` still reflects the shell's launch directory. To follow the agent's actual working directory, configure the agent to invoke the bundled hook script whenever its cwd could have changed.
 
-```sh
-tmux run-shell '$PLUGIN_DIR/scripts/diff_peek.sh'
+The hook script is at `scripts/cwd_hook.sh`. It reads a JSON payload on stdin, extracts the `cwd` field, and writes it to `~/.cache/tmux-diff-peek/<pane_id>.cwd` keyed by the `$TMUX_PANE` environment variable tmux sets on every child process. The plugin reads that file and falls back to `#{pane_current_path}` when it's absent or stale. The hook is a no-op outside tmux.
+
+### Claude Code
+
+Add the hook to `~/.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.tmux/plugins/tmux-diff-peek/scripts/cwd_hook.sh"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.tmux/plugins/tmux-diff-peek/scripts/cwd_hook.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
 ```
 
-```sh
-tmux run-shell '$PLUGIN_DIR/scripts/diff_peek_staged.sh'
-```
+Adjust the path if the plugin lives elsewhere.

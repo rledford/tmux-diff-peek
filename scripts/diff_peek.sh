@@ -3,10 +3,10 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 . "$SCRIPT_DIR/helpers.sh"
 
-pane_pid="$(tmux display-message -p "#{pane_pid}")"
+pane_id="$(tmux display-message -p "#{pane_id}")"
 pane_current_path="$(tmux display-message -p "#{pane_current_path}")"
 
-git_dir="$(resolve_git_cwd "$pane_pid" "$pane_current_path")"
+git_dir="$(resolve_git_cwd "$pane_id" "$pane_current_path")"
 
 check_git_repo "$git_dir" || exit 0
 

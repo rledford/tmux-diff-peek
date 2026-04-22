@@ -11,6 +11,6 @@ staged_key=$(get_tmux_option "$DIFF_PEEK_STAGED_KEY_OPTION" "$DIFF_PEEK_STAGED_K
 tmux bind-key "$key" run-shell "$PLUGIN_DIR/scripts/diff_peek.sh"
 tmux bind-key "$staged_key" run-shell "$PLUGIN_DIR/scripts/diff_peek_staged.sh"
 
-tmux set-hook -g pane-focus-in "run-shell '$PLUGIN_DIR/scripts/git_status.sh #{pane_id} #{pane_pid} #{pane_current_path}'"
+tmux set-hook -g pane-focus-in "run-shell '$PLUGIN_DIR/scripts/git_status.sh #{pane_id} #{pane_current_path}'"
 
 exit 0
