@@ -4,14 +4,36 @@ A tmux plugin that shows git diffs in a popup overlay without leaving your curre
 
 ## What It Does
 
-`tmux-diff-peek` provides two keybindings for viewing git diffs in a floating popup window:
+`tmux-diff-peek` provides two keybindings that open an interactive code-review popup for the current pane's git context. The popup runs neovim inside a `display-popup -E` overlay with a vertical split — a read-only diff buffer on the left and a writable comments buffer on the right.
 
-- `<prefix>-g` — Opens a popup showing unstaged changes and untracked files for the current pane's git context. The working directory is taken from `#{pane_current_path}` by default, or from a per-pane cache file populated by an agent hook (see [Agent CWD Hook](#agent-cwd-hook)).
-- `<prefix>-G` — Opens a popup showing staged changes (`git diff --cached`) for the current pane's git context.
+- `<prefix>-g` — Reviews unstaged changes plus untracked files.
+- `<prefix>-G` — Reviews staged changes (`git diff --cached`).
+
+The working directory is taken from `#{pane_current_path}` by default, or from a per-pane cache file populated by an agent hook (see [Agent CWD Hook](#agent-cwd-hook)).
+
+### Selection-to-comment flow
+
+In the diff buffer, select one or more diff lines with vim's `v` motion (or `V` for full lines), then press `<Enter>` to spawn a comment block in the right-hand buffer. Each block contains a markdown header with the file path and line range, a fenced ` ```diff ` snippet of the selected lines, and a blank line for your comment. After insertion, focus jumps to the new block in insert mode.
+
+Selections that span multiple files, multiple hunks, only removed lines, binary banners, or rename-only blocks are rejected with a transient message and no block is produced.
+
+### Navigating between diff and comments
+
+`<C-h>` jumps to the diff buffer and `<C-l>` jumps to the comments buffer. They work in normal, insert, and visual modes — so after typing a comment you can press `<C-h>` to jump straight back to the diff and start another selection without first leaving insert mode.
+
+In insert mode this overrides the default `<C-h>` = backspace. Use `<BS>` or `<Del>` to delete characters.
+
+### Export
+
+Press `<leader>x` in the comments buffer (configurable — see [`@diff-peek-export-key`](#diff-peek-export-key)) to copy all comments as markdown to the system clipboard via `pbcopy` (configurable — see [`@diff-peek-clipboard-command`](#diff-peek-clipboard-command)). Empty-body blocks are filtered out. A transient message reports how many blocks were copied. The popup stays open until you dismiss neovim with `:qa`; exiting without exporting has no clipboard side effects.
+
+The plugin uses its own neovim config (under `nvim/` inside the plugin) selected via `NVIM_APPNAME`, so it does not inherit or interfere with your normal `~/.config/nvim/` setup. The plugin sets its own leader (`<Space>`) before binding the export key.
 
 ## Requirements
 
 - tmux >= 3.2
+- neovim >= 0.9
+- `pbcopy` (macOS) for clipboard export, or an override via [`@diff-peek-clipboard-command`](#diff-peek-clipboard-command)
 
 ## Installation
 
@@ -77,15 +99,23 @@ The height of the popup as a percentage of the terminal height. Default: `80%`
 set -g @diff-peek-height '80%'
 ```
 
-## Pager Support
+### `@diff-peek-clipboard-command`
 
-The diff viewer respects git's pager configuration. Configure your preferred pager in your git config and it will be used automatically:
+The command used to write exported comments to the system clipboard. Default: `pbcopy` (macOS).
 
-```sh
-git config --global core.pager delta
+```tmux
+set -g @diff-peek-clipboard-command 'pbcopy'
 ```
 
-Any pager that works with `git diff` (e.g., `delta`, `diff-so-fancy`) will work inside the popup.
+The value is split on whitespace and passed as an argv list to `vim.fn.system`, so simple flag arguments are supported (e.g., `xclip -selection clipboard`). Shell-style quoting of arguments containing spaces is not supported.
+
+### `@diff-peek-export-key`
+
+The neovim mapping used to trigger export from the comments buffer. Default: `<leader>x` (the plugin sets its own leader to `<Space>`, so the default key is `<Space>x`).
+
+```tmux
+set -g @diff-peek-export-key '<leader>x'
+```
 
 ## Status Bar Git Info
 

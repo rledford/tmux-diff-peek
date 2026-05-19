@@ -1,0 +1,9 @@
+diff --git a/sample.txt b/sample.txt
+index 8888888..9999999 100644
+--- a/sample.txt
++++ b/sample.txt
+@@ -5,5 +5,2 @@
+ keep
+-drop_one
+-drop_two
+ still_keep

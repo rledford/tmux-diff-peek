@@ -14,31 +14,6 @@ get_tmux_option() {
   return 0
 }
 
-resolve_path() {
-  raw_input="$1"
-  pane_current_path="$2"
-
-  case "$raw_input" in
-    \~*)
-      resolved="$HOME${raw_input#\~}"
-      ;;
-    *)
-      resolved="$raw_input"
-      ;;
-  esac
-
-  case "$resolved" in
-    /*)
-      ;;
-    *)
-      resolved="$pane_current_path/$resolved"
-      ;;
-  esac
-
-  echo "$resolved"
-  return 0
-}
-
 check_git_repo() {
   if ! git -C "$1" rev-parse --is-inside-work-tree >/dev/null 2>/dev/null; then
     _saved_style="$(tmux show -gv message-style 2>/dev/null)"
@@ -86,4 +61,27 @@ resolve_git_cwd() {
   fi
 
   echo "$fallback"
+}
+
+build_unstaged_diff() {
+  cwd="$1"
+  outfile="$2"
+
+  LC_ALL=C git -C "$cwd" diff --no-color --no-ext-diff --ignore-submodules=all --src-prefix=a/ --dst-prefix=b/ >>"$outfile"
+
+  git -C "$cwd" ls-files --others --exclude-standard | while IFS= read -r relpath; do
+    [ -z "$relpath" ] && continue
+    LC_ALL=C git -C "$cwd" diff --no-color --no-ext-diff --ignore-submodules=all --src-prefix=a/ --dst-prefix=b/ --no-index /dev/null "$relpath" >>"$outfile" || true
+  done
+
+  return 0
+}
+
+build_staged_diff() {
+  cwd="$1"
+  outfile="$2"
+
+  LC_ALL=C git -C "$cwd" diff --cached --no-color --no-ext-diff --ignore-submodules=all --src-prefix=a/ --dst-prefix=b/ >>"$outfile"
+
+  return 0
 }

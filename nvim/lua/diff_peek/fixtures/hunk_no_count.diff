@@ -1,0 +1,7 @@
+diff --git a/single.txt b/single.txt
+index 6666666..7777777 100644
+--- a/single.txt
++++ b/single.txt
+@@ -10 +10 @@
+-was
++now

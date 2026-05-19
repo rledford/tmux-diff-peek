@@ -5,6 +5,11 @@ PLUGIN_DIR=$(cd "$(dirname "$0")" && pwd)
 . "$PLUGIN_DIR/scripts/variables.sh"
 . "$PLUGIN_DIR/scripts/helpers.sh"
 
+mkdir -p "$HOME/.config"
+if [ "$(readlink "$HOME/.config/tmux-diff-peek" 2>/dev/null)" != "$PLUGIN_DIR/nvim" ]; then
+  ln -sfn "$PLUGIN_DIR/nvim" "$HOME/.config/tmux-diff-peek"
+fi
+
 key=$(get_tmux_option "$DIFF_PEEK_KEY_OPTION" "$DIFF_PEEK_KEY_DEFAULT")
 staged_key=$(get_tmux_option "$DIFF_PEEK_STAGED_KEY_OPTION" "$DIFF_PEEK_STAGED_KEY_DEFAULT")
 

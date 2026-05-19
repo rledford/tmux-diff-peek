@@ -15,8 +15,23 @@ if has_diff "$git_dir" && ! has_untracked "$git_dir"; then
   exit 0
 fi
 
+if ! command -v nvim >/dev/null 2>&1; then
+  tmux display-message "diff-peek: nvim not found in PATH"
+  exit 0
+fi
+
 width="$(get_tmux_option "$DIFF_PEEK_WIDTH_OPTION" "$DIFF_PEEK_WIDTH_DEFAULT")"
 height="$(get_tmux_option "$DIFF_PEEK_HEIGHT_OPTION" "$DIFF_PEEK_HEIGHT_DEFAULT")"
+clipboard_cmd="$(get_tmux_option "$DIFF_PEEK_CLIPBOARD_COMMAND_OPTION" "$DIFF_PEEK_CLIPBOARD_COMMAND_DEFAULT")"
+export_key="$(get_tmux_option "$DIFF_PEEK_EXPORT_KEY_OPTION" "$DIFF_PEEK_EXPORT_KEY_DEFAULT")"
 
-tmux display-popup -E -d "$git_dir" -w "$width" -h "$height" -T " git diff " -- \
-  sh -c 'export DELTA_PAGER="less -R" LESS=R; { git diff --color=always; git ls-files --others --exclude-standard | while IFS= read -r f; do git diff --color=always --no-index /dev/null "$f"; done; } | eval "$(git var GIT_PAGER)"'
+tmpfile="$(mktemp -t tmux-diff-peek.XXXXXX)"
+trap 'rm -f "$tmpfile"' EXIT INT TERM
+
+build_unstaged_diff "$git_dir" "$tmpfile"
+
+tmux display-popup -E -d "$git_dir" -w "$width" -h "$height" -T " diff-peek review " \
+  -e "NVIM_APPNAME=tmux-diff-peek" \
+  -e "TMUX_DIFF_PEEK_CLIPBOARD_CMD=$clipboard_cmd" \
+  -e "TMUX_DIFF_PEEK_EXPORT_KEY=$export_key" \
+  -- nvim -n -R "$tmpfile"

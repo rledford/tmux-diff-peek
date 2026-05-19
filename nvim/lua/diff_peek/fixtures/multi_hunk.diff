@@ -1,0 +1,13 @@
+diff --git a/lib/example.rb b/lib/example.rb
+index 1111111..2222222 100644
+--- a/lib/example.rb
++++ b/lib/example.rb
+@@ -10,3 +10,4 @@
+ context_a
+-old_line
++new_line_1
++new_line_2
+@@ -30,2 +31,3 @@
+ ctx
++added_late
+ trailing
