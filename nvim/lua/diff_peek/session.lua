@@ -10,7 +10,6 @@ local state = {
 local rejection_messages = {
   multi_file = "diff-peek: selection spans multiple files",
   multi_hunk = "diff-peek: selection spans multiple hunks",
-  removed_only = "diff-peek: selection contains only removed lines",
   no_mappable = "diff-peek: selection has no mappable diff lines",
 }
 

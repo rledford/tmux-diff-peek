@@ -172,9 +172,31 @@ local function check_removed_only(name)
   parser._clear_cache_for_tests()
   parser.attach(buf)
 
+  local entry_l7 = parser.line_to_location(buf, 7)
+  if not entry_l7 then
+    fail(name, "line 7 expected mappable removed, got nil")
+  else
+    assert_eq(name, "L7.kind", "removed", entry_l7.kind)
+    assert_eq(name, "L7.file_line", nil, entry_l7.file_line)
+    assert_eq(name, "L7.pre_file_line", 6, entry_l7.pre_file_line)
+  end
+
+  local entry_l8 = parser.line_to_location(buf, 8)
+  if not entry_l8 then
+    fail(name, "line 8 expected mappable removed, got nil")
+  else
+    assert_eq(name, "L8.pre_file_line", 7, entry_l8.pre_file_line)
+  end
+
   local range, reason = parser.selection_to_range(buf, 7, 8)
-  assert_eq(name, "removed-only reason", "removed_only", reason)
-  assert_eq(name, "removed-only range", nil, range)
+  if reason then
+    fail(name, "expected range, got reason " .. tostring(reason))
+  end
+  if range then
+    assert_eq(name, "range.path", "sample.txt", range.path)
+    assert_eq(name, "range.start_file_line", 6, range.start_file_line)
+    assert_eq(name, "range.end_file_line", 7, range.end_file_line)
+  end
 end
 
 function M.run()

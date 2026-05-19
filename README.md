@@ -15,7 +15,7 @@ The working directory is taken from `#{pane_current_path}` by default, or from a
 
 In the diff buffer, select one or more diff lines with vim's `v` motion (or `V` for full lines), then press `<Enter>` to spawn a comment block in the right-hand buffer. Each block contains a markdown header with the file path and line range, a fenced ` ```diff ` snippet of the selected lines, and a blank line for your comment. After insertion, focus jumps to the new block in insert mode.
 
-Selections that span multiple files, multiple hunks, only removed lines, binary banners, or rename-only blocks are rejected with a transient message and no block is produced.
+Selections that span multiple files, multiple hunks, binary banners, or rename-only blocks are rejected with a transient message and no block is produced. Removed-only selections are supported — their header uses the pre-image (`a/`) line numbers.
 
 ### Navigating between diff and comments
 

@@ -3,27 +3,19 @@ local M = {}
 local cache = {}
 
 local function match_hunk_header(line)
-  local b_start = line:match("^@@ %-%d+,%d+ %+(%d+),%d+ @@")
-  if b_start then
-    return tonumber(b_start)
-  end
+  local a_start, b_start = line:match("^@@ %-(%d+),%d+ %+(%d+),%d+ @@")
+  if a_start then return tonumber(a_start), tonumber(b_start) end
 
-  b_start = line:match("^@@ %-%d+ %+(%d+),%d+ @@")
-  if b_start then
-    return tonumber(b_start)
-  end
+  a_start, b_start = line:match("^@@ %-(%d+) %+(%d+),%d+ @@")
+  if a_start then return tonumber(a_start), tonumber(b_start) end
 
-  b_start = line:match("^@@ %-%d+,%d+ %+(%d+) @@")
-  if b_start then
-    return tonumber(b_start)
-  end
+  a_start, b_start = line:match("^@@ %-(%d+),%d+ %+(%d+) @@")
+  if a_start then return tonumber(a_start), tonumber(b_start) end
 
-  b_start = line:match("^@@ %-%d+ %+(%d+) @@")
-  if b_start then
-    return tonumber(b_start)
-  end
+  a_start, b_start = line:match("^@@ %-(%d+) %+(%d+) @@")
+  if a_start then return tonumber(a_start), tonumber(b_start) end
 
-  return nil
+  return nil, nil
 end
 
 local function is_hunk_header(line)
@@ -36,6 +28,7 @@ function M.build(lines)
   local current_hunk_id = 0
   local in_hunk = false
   local counter = 0
+  local pre_counter = 0
   local file_block_unmappable = false
   local saw_post_image_warning = {}
 
@@ -47,6 +40,7 @@ function M.build(lines)
       in_hunk = false
       file_block_unmappable = false
       counter = 0
+      pre_counter = 0
 
       local b_path = line:match("^diff %-%-git a/.- b/(.+)$")
       if b_path then
@@ -84,10 +78,11 @@ function M.build(lines)
       if file_block_unmappable or not current_path then
         in_hunk = false
       else
-        local b_start = match_hunk_header(line)
+        local a_start, b_start = match_hunk_header(line)
         if b_start then
           current_hunk_id = current_hunk_id + 1
           counter = b_start
+          pre_counter = a_start
           in_hunk = true
         else
           in_hunk = false
@@ -100,6 +95,7 @@ function M.build(lines)
           path = current_path,
           hunk_id = current_hunk_id,
           file_line = counter,
+          pre_file_line = nil,
           kind = "added",
         }
         counter = counter + 1
@@ -108,16 +104,20 @@ function M.build(lines)
           path = current_path,
           hunk_id = current_hunk_id,
           file_line = nil,
+          pre_file_line = pre_counter,
           kind = "removed",
         }
+        pre_counter = pre_counter + 1
       elseif prefix == " " then
         map[i] = {
           path = current_path,
           hunk_id = current_hunk_id,
           file_line = counter,
+          pre_file_line = pre_counter,
           kind = "context",
         }
         counter = counter + 1
+        pre_counter = pre_counter + 1
       elseif line:match("^\\") then
         map[i] = false
       else
@@ -195,7 +195,20 @@ function M.selection_to_range(bufnr, s, e)
   end
 
   if start_file_line == nil then
-    return nil, "removed_only"
+    for _, entry in ipairs(mappable) do
+      if entry.pre_file_line ~= nil then
+        if start_file_line == nil or entry.pre_file_line < start_file_line then
+          start_file_line = entry.pre_file_line
+        end
+        if end_file_line == nil or entry.pre_file_line > end_file_line then
+          end_file_line = entry.pre_file_line
+        end
+      end
+    end
+  end
+
+  if start_file_line == nil then
+    return nil, "no_mappable"
   end
 
   return {
