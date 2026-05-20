@@ -19,9 +19,7 @@ Selections that span multiple files, multiple hunks, binary banners, or rename-o
 
 ### Navigating between diff and comments
 
-`<C-h>` jumps to the diff buffer and `<C-l>` jumps to the comments buffer. They work in normal, insert, and visual modes — so after typing a comment you can press `<C-h>` to jump straight back to the diff and start another selection without first leaving insert mode.
-
-In insert mode this overrides the default `<C-h>` = backspace. Use `<BS>` or `<Del>` to delete characters.
+`<C-h>` jumps to the diff buffer and `<C-l>` jumps to the comments buffer. They work in normal mode on both buffers, plus visual mode on the diff buffer (so a visual selection that isn't worth committing as a comment can be abandoned by jumping away). After typing a comment, press `<Esc>` to leave insert mode, then `<C-h>` to return to the diff.
 
 ### Export
 

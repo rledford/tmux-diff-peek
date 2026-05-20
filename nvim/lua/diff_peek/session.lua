@@ -151,16 +151,13 @@ function M.start(diff_buf)
     silent = true,
   })
 
-  local function bind_pane_switch(buf)
-    vim.keymap.set("n", "<C-h>", "<cmd>wincmd h<CR>", { buffer = buf, silent = true })
-    vim.keymap.set("n", "<C-l>", "<cmd>wincmd l<CR>", { buffer = buf, silent = true })
-    vim.keymap.set("i", "<C-h>", "<Esc><cmd>wincmd h<CR>", { buffer = buf, silent = true })
-    vim.keymap.set("i", "<C-l>", "<Esc><cmd>wincmd l<CR>", { buffer = buf, silent = true })
-    vim.keymap.set("x", "<C-h>", "<Esc><cmd>wincmd h<CR>", { buffer = buf, silent = true })
-    vim.keymap.set("x", "<C-l>", "<Esc><cmd>wincmd l<CR>", { buffer = buf, silent = true })
-  end
-  bind_pane_switch(diff_buf)
-  bind_pane_switch(comments_buf)
+  vim.keymap.set("n", "<C-h>", "<cmd>wincmd h<CR>", { buffer = diff_buf, silent = true })
+  vim.keymap.set("n", "<C-l>", "<cmd>wincmd l<CR>", { buffer = diff_buf, silent = true })
+  vim.keymap.set("x", "<C-h>", "<Esc><cmd>wincmd h<CR>", { buffer = diff_buf, silent = true })
+  vim.keymap.set("x", "<C-l>", "<Esc><cmd>wincmd l<CR>", { buffer = diff_buf, silent = true })
+
+  vim.keymap.set("n", "<C-h>", "<cmd>wincmd h<CR>", { buffer = comments_buf, silent = true })
+  vim.keymap.set("n", "<C-l>", "<cmd>wincmd l<CR>", { buffer = comments_buf, silent = true })
 
   vim.api.nvim_create_user_command("DiffPeekExport", function()
     M.export()
